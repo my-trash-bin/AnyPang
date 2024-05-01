@@ -1,0 +1,11 @@
+{
+  "[csharp]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-dotnettools.csharp",
+  },
+  "[shaderlab]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "litefeel.shaderlabformatter"
+  },
+  "omnisharp.useModernNet": false,
+}
