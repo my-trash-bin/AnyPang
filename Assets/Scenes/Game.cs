@@ -90,6 +90,10 @@ public class Game : MonoBehaviour
             int x = currentSelection % SIZE;
             int y = currentSelection / SIZE;
             GameObject gem = gemPool[map[currentSelection]][currentSelection];
+            if (originalToCurrent.x > 2) originalToCurrent.x = 2;
+            if (originalToCurrent.x < -2) originalToCurrent.x = -2;
+            if (originalToCurrent.y > 2) originalToCurrent.y = 2;
+            if (originalToCurrent.y < -2) originalToCurrent.y = -2;
             gem.GetComponent<Transform>().localPosition = Position(x, y) + originalToCurrent + new Vector3(0, 0, -1);
             gem.GetComponent<Collider2D>().enabled = false;
         }
