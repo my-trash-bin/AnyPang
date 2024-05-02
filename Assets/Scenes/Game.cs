@@ -42,7 +42,6 @@ public class Game : MonoBehaviour
                 info.X = j % SIZE;
                 info.Y = j / SIZE;
                 info.Game = this;
-                gem.GetComponent<Transform>().localPosition = Position(j % SIZE, j / SIZE);
                 gem.SetActive(false);
             }
         }
@@ -61,7 +60,12 @@ public class Game : MonoBehaviour
         for (int i = 0; i < SIZE * SIZE; i++)
         {
             for (int j = 0; j < 5; j++)
+            {
+                int x = i % SIZE;
+                int y = i / SIZE;
+                gemPool[j][i].GetComponent<Transform>().localPosition = Position(x, y);
                 gemPool[j][i].SetActive(map[i] == j);
+            }
         }
         if (currentSelection == -1)
         {
@@ -75,6 +79,16 @@ public class Game : MonoBehaviour
             position.z = -5;
             selectionIndicator.GetComponent<Transform>().localPosition = position;
             selectionIndicator.SetActive(true);
+        }
+
+        if (currentSelection != -1)
+        {
+            Vector3 originalWorldPosition = Camera.main.ScreenToWorldPoint(clickedPosition);
+            Vector3 currentWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 distance = currentWorldPosition - originalWorldPosition;
+            int x = currentSelection % SIZE;
+            int y = currentSelection / SIZE;
+            gemPool[map[currentSelection]][currentSelection].GetComponent<Transform>().localPosition = Position(x, y) + distance;
         }
     }
 
