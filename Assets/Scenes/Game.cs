@@ -79,16 +79,26 @@ public class Game : MonoBehaviour
     }
 
     int currentSelection = -1;
+    Vector3 clickedPosition;
 
-    public void onGemClick(GemInfo gemInfo)
+    public void onGemMouseDown(GemInfo gemInfo)
     {
         if (currentSelection == -1)
         {
             currentSelection = gemInfo.Y * SIZE + gemInfo.X;
+            clickedPosition = Input.mousePosition;
         }
-        else
+    }
+
+    public void onGemMouseUp(GemInfo gemInfo)
+    {
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        RaycastHit2D hitInformation = Physics2D.Raycast(worldPosition, Camera.main.transform.forward);
+        if (hitInformation.collider != null)
         {
-            int newSelection = gemInfo.Y * SIZE + gemInfo.X;
+            GameObject clickedObject = hitInformation.transform.gameObject;
+            GemInfo gem = clickedObject.GetComponent<GemInfo>();
+            int newSelection = gem.Y * SIZE + gem.X;
             if (isAdjacent(currentSelection, newSelection))
                 (map[currentSelection], map[newSelection]) = (map[newSelection], map[currentSelection]);
             currentSelection = -1;

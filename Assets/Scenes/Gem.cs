@@ -4,6 +4,11 @@ public class Gem : MonoBehaviour
 {
     void OnMouseDown()
     {
-        GetComponent<GemInfo>().Game.onGemClick(GetComponent<GemInfo>());
+        GetComponent<GemInfo>().Game.onGemMouseDown(GetComponent<GemInfo>());
+    }
+
+    void OnMouseUp()
+    {
+        GetComponent<GemInfo>().Game.onGemMouseUp(GetComponent<GemInfo>());
     }
 }
