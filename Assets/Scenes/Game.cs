@@ -5,7 +5,7 @@ using UnityEngine;
 public class Game : MonoBehaviour
 {
     [SerializeField]
-    Transform bluePrefab, redPrefab, greenPrefab, yellowPrefab, blackPrefab;
+    GameObject bluePrefab, redPrefab, greenPrefab, yellowPrefab, blackPrefab;
 
     const int SIZE = 10;
     System.Random random = new();
@@ -19,22 +19,22 @@ public class Game : MonoBehaviour
         return result;
     }
 
-    Transform[][] gemPool;
+    GameObject[][] gemPool;
 
     int[][] map;
 
     void Awake()
     {
-        Transform[] gemType = { bluePrefab, redPrefab, greenPrefab, yellowPrefab, blackPrefab };
-        gemPool = new Transform[5][];
+        GameObject[] gemType = { bluePrefab, redPrefab, greenPrefab, yellowPrefab, blackPrefab };
+        gemPool = new GameObject[5][];
         for (int i = 0; i < 5; i++)
         {
-            gemPool[i] = new Transform[SIZE * SIZE];
+            gemPool[i] = new GameObject[SIZE * SIZE];
             for (int j = 0; j < SIZE * SIZE; j++)
             {
-                Transform gem = gemPool[i][j] = Instantiate(gemType[i]);
-                gem.localPosition = Position(j % SIZE, j / SIZE);
-                gem.gameObject.SetActive(false);
+                GameObject gem = gemPool[i][j] = Instantiate(gemType[i]);
+                gem.GetComponent<Transform>().localPosition = Position(j % SIZE, j / SIZE);
+                gem.SetActive(false);
             }
         }
     }

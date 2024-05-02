@@ -244,11 +244,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05f90f2216974f84daaddc1d264e2203, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bluePrefab: {fileID: 1853620759024246233, guid: 8bc04ecab9e2c7e4e9eb185251e477da, type: 3}
-  redPrefab: {fileID: 4932806251627687361, guid: 38ae951c40b2f8148b6ef2d08cd4b812, type: 3}
-  greenPrefab: {fileID: 977189397020142412, guid: f915541d670273b4db1edef737f5f664, type: 3}
-  yellowPrefab: {fileID: 9030721823929526892, guid: be22ced63883bb348944be38bc51ef0e, type: 3}
-  blackPrefab: {fileID: 7450517939810150941, guid: 84578a591de818e4a9a00771ec04123b, type: 3}
+  bluePrefab: {fileID: 4258877687057037113, guid: 8bc04ecab9e2c7e4e9eb185251e477da, type: 3}
+  redPrefab: {fileID: 6357348556135595207, guid: 38ae951c40b2f8148b6ef2d08cd4b812, type: 3}
+  greenPrefab: {fileID: 1567344797810076000, guid: f915541d670273b4db1edef737f5f664, type: 3}
+  yellowPrefab: {fileID: 5955003746450577746, guid: be22ced63883bb348944be38bc51ef0e, type: 3}
+  blackPrefab: {fileID: 9074365789733675811, guid: 84578a591de818e4a9a00771ec04123b, type: 3}
 --- !u!4 &1661169993
 Transform:
   m_ObjectHideFlags: 0
