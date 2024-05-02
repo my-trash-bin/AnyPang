@@ -2,13 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-class GemInfo : MonoBehaviour
-{
-    public int GemType;
-    public int X;
-    public int Y;
-}
-
 public class Game : MonoBehaviour
 {
     [SerializeField]
@@ -31,7 +24,7 @@ public class Game : MonoBehaviour
 
     GameObject[][] gemPool;
 
-    int[][] map;
+    int[] map;
 
     void Awake()
     {
@@ -48,6 +41,7 @@ public class Game : MonoBehaviour
                 info.GemType = i;
                 info.X = j % SIZE;
                 info.Y = j / SIZE;
+                info.Game = this;
                 gem.GetComponent<Transform>().localPosition = Position(j % SIZE, j / SIZE);
                 gem.SetActive(false);
             }
@@ -57,13 +51,9 @@ public class Game : MonoBehaviour
 
     void Start()
     {
-        map = new int[SIZE][];
-        for (int i = 0; i < SIZE; i++)
-        {
-            map[i] = new int[SIZE];
-            for (int j = 0; j < SIZE; j++)
-                map[i][j] = random.Next(5);
-        }
+        map = new int[SIZE * SIZE];
+        for (int i = 0; i < SIZE * SIZE; i++)
+            map[i] = random.Next(5);
     }
 
     void Update()
@@ -71,7 +61,50 @@ public class Game : MonoBehaviour
         for (int i = 0; i < SIZE * SIZE; i++)
         {
             for (int j = 0; j < 5; j++)
-                gemPool[j][i].SetActive(map[i / SIZE][i % SIZE] == j);
+                gemPool[j][i].SetActive(map[i] == j);
         }
+        if (currentSelection == -1)
+        {
+            selectionIndicator.SetActive(false);
+        }
+        else
+        {
+            int x = currentSelection % SIZE;
+            int y = currentSelection / SIZE;
+            Vector3 position = Position(x, y);
+            position.z = -5;
+            selectionIndicator.GetComponent<Transform>().localPosition = position;
+            selectionIndicator.SetActive(true);
+        }
+    }
+
+    int currentSelection = -1;
+
+    public void onGemClick(GemInfo gemInfo)
+    {
+        if (currentSelection == -1)
+        {
+            currentSelection = gemInfo.Y * SIZE + gemInfo.X;
+        }
+        else
+        {
+            int newSelection = gemInfo.Y * SIZE + gemInfo.X;
+            if (isAdjacent(currentSelection, newSelection))
+                (map[currentSelection], map[newSelection]) = (map[newSelection], map[currentSelection]);
+            currentSelection = -1;
+        }
+    }
+
+    bool isAdjacent(int a, int b)
+    {
+        int ax = a % SIZE;
+        int ay = a / SIZE;
+        int bx = b % SIZE;
+        int by = b / SIZE;
+        int dx = ax - bx;
+        int dy = ay - by;
+        dx = dx < 0 ? -dx : dx;
+        dy = dy < 0 ? -dy : dy;
+        return (dx == 0 && dy == 1) || (dy == 0 && dx == 1);
     }
 }
