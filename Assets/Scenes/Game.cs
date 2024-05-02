@@ -85,10 +85,10 @@ public class Game : MonoBehaviour
         {
             Vector3 originalWorldPosition = Camera.main.ScreenToWorldPoint(clickedPosition);
             Vector3 currentWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector3 distance = currentWorldPosition - originalWorldPosition;
+            Vector3 originalToCurrent = currentWorldPosition - originalWorldPosition;
             int x = currentSelection % SIZE;
             int y = currentSelection / SIZE;
-            gemPool[map[currentSelection]][currentSelection].GetComponent<Transform>().localPosition = Position(x, y) + distance;
+            gemPool[map[currentSelection]][currentSelection].GetComponent<Transform>().localPosition = Position(x, y) + originalToCurrent + new Vector3(0, 0, -1);
         }
     }
 
