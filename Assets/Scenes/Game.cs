@@ -64,6 +64,7 @@ public class Game : MonoBehaviour
                 int x = i % SIZE;
                 int y = i / SIZE;
                 gemPool[j][i].GetComponent<Transform>().localPosition = Position(x, y);
+                gemPool[j][i].GetComponent<Collider2D>().enabled = true;
                 gemPool[j][i].SetActive(map[i] == j);
             }
         }
@@ -88,7 +89,9 @@ public class Game : MonoBehaviour
             Vector3 originalToCurrent = currentWorldPosition - originalWorldPosition;
             int x = currentSelection % SIZE;
             int y = currentSelection / SIZE;
-            gemPool[map[currentSelection]][currentSelection].GetComponent<Transform>().localPosition = Position(x, y) + originalToCurrent + new Vector3(0, 0, -1);
+            GameObject gem = gemPool[map[currentSelection]][currentSelection];
+            gem.GetComponent<Transform>().localPosition = Position(x, y) + originalToCurrent + new Vector3(0, 0, -1);
+            gem.GetComponent<Collider2D>().enabled = false;
         }
     }
 
