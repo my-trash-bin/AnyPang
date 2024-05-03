@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using UnityEngine;
 
@@ -30,7 +31,7 @@ class GameState
 
     public Cell[][] Tick()
     {
-        for (int i = 0; i < SIZE; i++)
+        for (int i = 0; i < SIZE * SIZE; i++)
             map[i].PreviousY = i / SIZE;
 
         List<Cell[]> result = new();
@@ -140,9 +141,9 @@ class GameState
         }
     }
 
-    public int Get(int index)
+    public Cell Get(int index)
     {
-        return map[index].Type;
+        return map[index];
     }
 
     public void Swap(int a, int b)
@@ -156,31 +157,6 @@ class GameState
     }
 }
 
-class GameStateForGame
-{
-    GameState state;
-
-    public GameStateForGame()
-    {
-        state = new();
-    }
-
-    public bool Tick()
-    {
-        return state.Tick() != null;
-    }
-
-    public int Get(int index)
-    {
-        return state.Get(index);
-    }
-
-    public void Swap(int a, int b)
-    {
-        state.Swap(a, b);
-    }
-}
-
 public class Game : MonoBehaviour
 {
     [SerializeField]
@@ -189,7 +165,15 @@ public class Game : MonoBehaviour
     [SerializeField]
     GameObject selectionIndicator;
 
-    static Vector3 Position(int x, int y)
+    const float FALLING_ANIMATION_DURATION = 0.5f;
+
+    static float FallingAnimationDistance(float elapsedTime)
+    {
+        float x = elapsedTime / FALLING_ANIMATION_DURATION;
+        return x * x * 10;
+    }
+
+    static Vector3 Position(int x, float y)
     {
         Vector3 result;
         result.y = y * 2 - 9;
@@ -201,7 +185,9 @@ public class Game : MonoBehaviour
     GameObject[][] gemPool;
     GameObject[] gemsForAnimation;
 
-    GameStateForGame state = new();
+    GameState state = new();
+    bool isAnimating;
+    float animationElapsedTime;
 
     void Awake()
     {
@@ -240,7 +226,7 @@ public class Game : MonoBehaviour
                 gemPool[j][i].GetComponent<Transform>().localPosition = Position(x, y);
                 gemPool[j][i].GetComponent<Collider2D>().enabled = true;
                 gemPool[j][i].GetComponent<SpriteRenderer>().enabled = true;
-                gemPool[j][i].SetActive(state.Get(i) == j);
+                gemPool[j][i].SetActive(state.Get(i).Type == j);
             }
         }
         if (currentSelection == -1)
@@ -268,7 +254,7 @@ public class Game : MonoBehaviour
             Vector3 originalToCurrent = currentWorldPosition - originalWorldPosition;
             int x = currentSelection % GameState.SIZE;
             int y = currentSelection / GameState.SIZE;
-            GameObject gem = gemPool[state.Get(currentSelection)][currentSelection];
+            GameObject gem = gemPool[state.Get(currentSelection).Type][currentSelection];
 
             if (originalToCurrent.x > 2) originalToCurrent.x = 2;
             if (originalToCurrent.x < -2) originalToCurrent.x = -2;
@@ -297,11 +283,37 @@ public class Game : MonoBehaviour
                 int adjacentX = x + (!movingX ? 0 : originalToCurrent.x > 0 ? 1 : -1);
                 int adjacentY = y + (movingX ? 0 : originalToCurrent.y > 0 ? 1 : -1);
                 int adjacentIndex = adjacentY * GameState.SIZE + adjacentX;
-                GameObject gemForAnimation = gemsForAnimation[state.Get(adjacentIndex)];
+                GameObject gemForAnimation = gemsForAnimation[state.Get(adjacentIndex).Type];
                 gemForAnimation.GetComponent<Transform>().localPosition = Position(adjacentX, adjacentY) - originalToCurrent + new Vector3(0, 0, -1);
                 gemForAnimation.SetActive(true);
-                GameObject adjacentGem = gemPool[state.Get(adjacentIndex)][adjacentIndex];
+                GameObject adjacentGem = gemPool[state.Get(adjacentIndex).Type][adjacentIndex];
                 adjacentGem.GetComponent<SpriteRenderer>().enabled = false;
+            }
+        }
+
+        if (isAnimating)
+        {
+            animationElapsedTime += Time.deltaTime;
+            if (animationElapsedTime > FALLING_ANIMATION_DURATION)
+            {
+                isAnimating = false;
+            }
+            else
+            {
+                for (int i = 0; i < GameState.SIZE * GameState.SIZE; i++)
+                {
+                    float currentPosition = state.Get(i).PreviousY - FallingAnimationDistance(animationElapsedTime);
+                    float realPosition = Mathf.Max(i / GameState.SIZE, currentPosition);
+                    gemPool[state.Get(i).Type][i].GetComponent<Transform>().localPosition = Position(i % GameState.SIZE, realPosition);
+                }
+            }
+        }
+        else
+        {
+            if (state.Tick() != null)
+            {
+                isAnimating = true;
+                animationElapsedTime = 0;
             }
         }
     }
@@ -311,6 +323,7 @@ public class Game : MonoBehaviour
 
     public void onGemMouseDown(GemInfo gemInfo)
     {
+        if (isAnimating) return;
         if (currentSelection == -1)
         {
             currentSelection = gemInfo.Y * GameState.SIZE + gemInfo.X;
@@ -329,10 +342,7 @@ public class Game : MonoBehaviour
             GemInfo gem = clickedObject.GetComponent<GemInfo>();
             int newSelection = gem.Y * GameState.SIZE + gem.X;
             if (isAdjacent(currentSelection, newSelection))
-            {
                 state.Swap(currentSelection, newSelection);
-                state.Tick();
-            }
             currentSelection = -1;
         }
     }
