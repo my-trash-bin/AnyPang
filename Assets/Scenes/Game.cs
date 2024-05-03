@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -90,10 +91,20 @@ public class Game : MonoBehaviour
             int x = currentSelection % SIZE;
             int y = currentSelection / SIZE;
             GameObject gem = gemPool[map[currentSelection]][currentSelection];
+
             if (originalToCurrent.x > 2) originalToCurrent.x = 2;
             if (originalToCurrent.x < -2) originalToCurrent.x = -2;
             if (originalToCurrent.y > 2) originalToCurrent.y = 2;
             if (originalToCurrent.y < -2) originalToCurrent.y = -2;
+
+            if (Mathf.Abs(originalToCurrent.x) > 0 && Mathf.Abs(originalToCurrent.y) > 0)
+            {
+                if (Mathf.Abs(originalToCurrent.x) > Mathf.Abs(originalToCurrent.y))
+                    originalToCurrent.y = 0;
+                else
+                    originalToCurrent.x = 0;
+            }
+
             gem.GetComponent<Transform>().localPosition = Position(x, y) + originalToCurrent + new Vector3(0, 0, -1);
             gem.GetComponent<Collider2D>().enabled = false;
         }
