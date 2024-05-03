@@ -182,7 +182,7 @@ public class Game : MonoBehaviour
             gem.GetComponent<Transform>().localPosition += originalToCurrent + new Vector3(0, 0, -2);
             gem.GetComponent<Collider2D>().enabled = false;
 
-            if (!(movingX && originalToCurrent.x == 0 || !movingX && originalToCurrent.y == 0))
+            if (originalToCurrent.x != 0 || originalToCurrent.y != 0)
             {
                 int adjacentX = x + (!movingX ? 0 : originalToCurrent.x > 0 ? 1 : -1);
                 int adjacentY = y + (movingX ? 0 : originalToCurrent.y > 0 ? 1 : -1);
