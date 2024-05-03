@@ -1,8 +1,4 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 using UnityEngine;
 
 class GameState
@@ -102,8 +98,6 @@ class GameState
         if (isClearedNow[i]) return;
         isClearedNow[i] = true;
         cells.Add(map[i]);
-
-        Debug.Log("x: " + x + " y: " + y);
 
         if (x >= 2)
             TickFloodFillCheckRow(result, isCleared, x - 2, y, isClearedNow, cells);
