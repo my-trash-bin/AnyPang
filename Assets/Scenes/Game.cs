@@ -155,16 +155,31 @@ public class Game : MonoBehaviour
             if (originalToCurrent.y > 2) originalToCurrent.y = 2;
             if (originalToCurrent.y < -2) originalToCurrent.y = -2;
 
-            if (Mathf.Abs(originalToCurrent.x) > 0 && Mathf.Abs(originalToCurrent.y) > 0)
-            {
-                if (Mathf.Abs(originalToCurrent.x) > Mathf.Abs(originalToCurrent.y))
-                    originalToCurrent.y = 0;
-                else
-                    originalToCurrent.x = 0;
-            }
+            bool movingX = Mathf.Abs(originalToCurrent.x) > Mathf.Abs(originalToCurrent.y);
+            if (movingX)
+                originalToCurrent.y = 0;
+            else
+                originalToCurrent.x = 0;
+            if (x == 0 && originalToCurrent.x < 0)
+                originalToCurrent.x = 0;
+            if (x == GameState.SIZE - 1 && originalToCurrent.x > 0)
+                originalToCurrent.x = 0;
+            if (y == 0 && originalToCurrent.y < 0)
+                originalToCurrent.y = 0;
+            if (y == GameState.SIZE - 1 && originalToCurrent.y > 0)
+                originalToCurrent.y = 0;
 
-            gem.GetComponent<Transform>().localPosition = Position(x, y) + originalToCurrent + new Vector3(0, 0, -1);
+            gem.GetComponent<Transform>().localPosition += originalToCurrent + new Vector3(0, 0, -1);
             gem.GetComponent<Collider2D>().enabled = false;
+
+            if (!(movingX && originalToCurrent.x == 0 || !movingX && originalToCurrent.y == 0))
+            {
+                int adjacentX = !movingX ? 0 : originalToCurrent.x > 0 ? 1 : -1;
+                int adjacentY = movingX ? 0 : originalToCurrent.y > 0 ? 1 : -1;
+                int adjacentIndex = (y + adjacentY) * GameState.SIZE + x + adjacentX;
+                GameObject adjacentGem = gemPool[state.Get(adjacentIndex)][adjacentIndex];
+                adjacentGem.GetComponent<Transform>().localPosition -= originalToCurrent;
+            }
         }
     }
 
