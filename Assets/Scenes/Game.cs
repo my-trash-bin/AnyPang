@@ -89,6 +89,7 @@ public class Game : MonoBehaviour
     }
 
     GameObject[][] gemPool;
+    GameObject[] gemsForAnimation;
 
     GameStateForGame state = new();
 
@@ -96,6 +97,7 @@ public class Game : MonoBehaviour
     {
         GameObject[] gemType = { bluePrefab, redPrefab, greenPrefab, yellowPrefab, blackPrefab };
         gemPool = new GameObject[5][];
+        gemsForAnimation = new GameObject[5];
         for (int i = 0; i < 5; i++)
         {
             gemPool[i] = new GameObject[GameState.SIZE * GameState.SIZE];
@@ -110,6 +112,9 @@ public class Game : MonoBehaviour
                 info.Game = this;
                 gem.SetActive(false);
             }
+            GameObject forAnimation = gemsForAnimation[i] = Instantiate(gemType[i]);
+            forAnimation.GetComponent<Collider2D>().enabled = false;
+            forAnimation.SetActive(false);
         }
         selectionIndicator.SetActive(false);
     }
@@ -124,6 +129,7 @@ public class Game : MonoBehaviour
                 int y = i / GameState.SIZE;
                 gemPool[j][i].GetComponent<Transform>().localPosition = Position(x, y);
                 gemPool[j][i].GetComponent<Collider2D>().enabled = true;
+                gemPool[j][i].GetComponent<SpriteRenderer>().enabled = true;
                 gemPool[j][i].SetActive(state.Get(i) == j);
             }
         }
@@ -139,6 +145,10 @@ public class Game : MonoBehaviour
             position.z = -5;
             selectionIndicator.GetComponent<Transform>().localPosition = position;
             selectionIndicator.SetActive(true);
+        }
+        for (int i = 0; i < 5; i++)
+        {
+            gemsForAnimation[i].SetActive(false);
         }
 
         if (currentSelection != -1)
@@ -169,16 +179,19 @@ public class Game : MonoBehaviour
             if (y == GameState.SIZE - 1 && originalToCurrent.y > 0)
                 originalToCurrent.y = 0;
 
-            gem.GetComponent<Transform>().localPosition += originalToCurrent + new Vector3(0, 0, -1);
+            gem.GetComponent<Transform>().localPosition += originalToCurrent + new Vector3(0, 0, -2);
             gem.GetComponent<Collider2D>().enabled = false;
 
             if (!(movingX && originalToCurrent.x == 0 || !movingX && originalToCurrent.y == 0))
             {
-                int adjacentX = !movingX ? 0 : originalToCurrent.x > 0 ? 1 : -1;
-                int adjacentY = movingX ? 0 : originalToCurrent.y > 0 ? 1 : -1;
-                int adjacentIndex = (y + adjacentY) * GameState.SIZE + x + adjacentX;
+                int adjacentX = x + (!movingX ? 0 : originalToCurrent.x > 0 ? 1 : -1);
+                int adjacentY = y + (movingX ? 0 : originalToCurrent.y > 0 ? 1 : -1);
+                int adjacentIndex = adjacentY * GameState.SIZE + adjacentX;
+                GameObject gemForAnimation = gemsForAnimation[state.Get(adjacentIndex)];
+                gemForAnimation.GetComponent<Transform>().localPosition = Position(adjacentX, adjacentY) - originalToCurrent + new Vector3(0, 0, -1);
+                gemForAnimation.SetActive(true);
                 GameObject adjacentGem = gemPool[state.Get(adjacentIndex)][adjacentIndex];
-                adjacentGem.GetComponent<Transform>().localPosition -= originalToCurrent;
+                adjacentGem.GetComponent<SpriteRenderer>().enabled = false;
             }
         }
     }
