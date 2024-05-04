@@ -336,7 +336,18 @@ public class Game : MonoBehaviour
             GemInfo gem = clickedObject.GetComponent<GemInfo>();
             int newSelection = gem.Y * GameState.SIZE + gem.X;
             if (isAdjacent(currentSelection, newSelection))
+            {
                 state.Swap(currentSelection, newSelection);
+                if (state.Tick() != null)
+                {
+                    isAnimating = true;
+                    animationElapsedTime = 0;
+                }
+                else
+                {
+                    state.Swap(currentSelection, newSelection);
+                }
+            }
             currentSelection = -1;
         }
     }
