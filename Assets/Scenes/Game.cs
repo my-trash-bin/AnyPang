@@ -7,6 +7,8 @@ class GameState
     {
         public int Type;
         public int PreviousY;
+        public int X;
+        public int Y;
     }
 
     public const int SIZE = 10;
@@ -22,6 +24,8 @@ class GameState
         {
             map[i].Type = Next();
             map[i].PreviousY = i / SIZE;
+            map[i].X = i % SIZE;
+            map[i].Y = i / SIZE;
         }
     }
 
@@ -61,6 +65,12 @@ class GameState
                     isCleared[(SIZE - 1) * SIZE + x] = false;
                 }
             }
+        }
+
+        for (int i = 0; i < SIZE * SIZE; i++)
+        {
+            map[i].X = i % SIZE;
+            map[i].Y = i / SIZE;
         }
 
         return result.Count == 0 ? null : result.ToArray();
@@ -159,6 +169,9 @@ public class Game : MonoBehaviour
     [SerializeField]
     GameObject selectionIndicator;
 
+    [SerializeField]
+    GameObject effectPrefab;
+
     const float FALLING_ANIMATION_DURATION = 0.5f;
 
     static float FallingAnimationDistance(float elapsedTime)
@@ -178,10 +191,12 @@ public class Game : MonoBehaviour
 
     GameObject[][] gemPool;
     GameObject[] gemsForAnimation;
+    GameObject[] particles;
 
     GameState state = new();
     bool isAnimating;
     float animationElapsedTime;
+    GameState.Cell[][] removedCellGroups = null;
 
     void Awake()
     {
@@ -207,6 +222,13 @@ public class Game : MonoBehaviour
             forAnimation.SetActive(false);
         }
         selectionIndicator.SetActive(false);
+        particles = new GameObject[GameState.SIZE * GameState.SIZE];
+        for (int i = 0; i < GameState.SIZE * GameState.SIZE; i++)
+        {
+            GameObject particle = particles[i] = Instantiate(effectPrefab);
+            particle.GetComponent<Transform>().localPosition = Position(i % GameState.SIZE, i / GameState.SIZE);
+            particle.SetActive(false);
+        }
     }
 
     void Update()
@@ -223,6 +245,15 @@ public class Game : MonoBehaviour
                 gemPool[j][i].SetActive(state.Get(i).Type == j);
             }
         }
+
+        bool[] particleEnabled = new bool[GameState.SIZE * GameState.SIZE];
+        if (removedCellGroups != null)
+            foreach (GameState.Cell[] cells in removedCellGroups)
+                foreach (GameState.Cell cell in cells)
+                    particleEnabled[cell.Y * GameState.SIZE + cell.X] = true;
+        for (int i = 0; i < GameState.SIZE * GameState.SIZE; i++)
+            particles[i].SetActive(particleEnabled[i]);
+
         if (currentSelection == -1)
         {
             selectionIndicator.SetActive(false);
@@ -303,13 +334,7 @@ public class Game : MonoBehaviour
             }
         }
         else
-        {
-            if (state.Tick() != null)
-            {
-                isAnimating = true;
-                animationElapsedTime = 0;
-            }
-        }
+            Tick();
     }
 
     int currentSelection = -1;
@@ -338,21 +363,26 @@ public class Game : MonoBehaviour
             if (isAdjacent(currentSelection, newSelection))
             {
                 state.Swap(currentSelection, newSelection);
-                if (state.Tick() != null)
-                {
-                    isAnimating = true;
-                    animationElapsedTime = 0;
-                }
-                else
-                {
+                if (!Tick())
                     state.Swap(currentSelection, newSelection);
-                }
             }
             currentSelection = -1;
         }
     }
 
-    bool isAdjacent(int a, int b)
+    private bool Tick()
+    {
+        removedCellGroups = state.Tick();
+        if (removedCellGroups != null)
+        {
+            isAnimating = true;
+            animationElapsedTime = 0;
+            return true;
+        }
+        return false;
+    }
+
+    private static bool isAdjacent(int a, int b)
     {
         int ax = a % GameState.SIZE;
         int ay = a / GameState.SIZE;
