@@ -153,6 +153,10 @@ class GameState
     public void Swap(int a, int b)
     {
         (map[a], map[b]) = (map[b], map[a]);
+        map[a].X = a % SIZE;
+        map[a].Y = a / SIZE;
+        map[b].X = b % SIZE;
+        map[b].Y = b / SIZE;
     }
 
     int Next()
