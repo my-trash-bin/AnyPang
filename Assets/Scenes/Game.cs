@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 class GameState
@@ -178,6 +179,9 @@ public class Game : MonoBehaviour
     [SerializeField]
     GameObject effectPrefab;
 
+    [SerializeField]
+    GameObject ScoreText;
+
     const float FALLING_ANIMATION_DURATION = 0.5f;
 
     static float FallingAnimationDistance(float elapsedTime)
@@ -203,6 +207,18 @@ public class Game : MonoBehaviour
     bool isAnimating;
     float animationElapsedTime;
     GameState.Cell[][] removedCellGroups = null;
+
+    long score;
+
+    long Score
+    {
+        get { return score; }
+        set
+        {
+            score = value;
+            ScoreText.GetComponent<TextMeshPro>().text = "Score\n" + score.ToString("N0");
+        }
+    }
 
     void Awake()
     {
@@ -388,6 +404,11 @@ public class Game : MonoBehaviour
             isAnimating = true;
             audioData.volume = removedCellGroups.Length / 3.0f;
             audioData.Play(0);
+
+            long scoreIncrement = 0;
+            foreach (GameState.Cell[] cells in removedCellGroups)
+                scoreIncrement += cells.Length * cells.Length;
+            Score += scoreIncrement;
 
             animationElapsedTime = 0;
             return true;
