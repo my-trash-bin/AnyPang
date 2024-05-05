@@ -101,7 +101,8 @@ class GameState
         bool[] isRemovedInThisGroup = new bool[SIZE * SIZE];
         List<Cell> cells = new();
         TickFloodFill(result, isRemovedInThisTick, x, y, isRemovedInThisGroup, cells);
-        result.Add(cells.ToArray());
+        if (cells.Count != 0)
+            result.Add(cells.ToArray());
         for (int i = 0; i < SIZE * SIZE; i++)
             isRemovedInThisTick[i] |= isRemovedInThisGroup[i];
     }
