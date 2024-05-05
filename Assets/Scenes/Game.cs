@@ -386,6 +386,7 @@ public class Game : MonoBehaviour
         if (removedCellGroups != null)
         {
             isAnimating = true;
+            audioData.volume = removedCellGroups.Length / 3.0f;
             audioData.Play(0);
 
             animationElapsedTime = 0;
