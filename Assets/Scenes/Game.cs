@@ -183,7 +183,7 @@ public class Game : MonoBehaviour
     GameObject ScoreText;
 
     [SerializeField]
-    GameObject MainCamenra;
+    GameObject MainCamera;
 
     const float FALLING_ANIMATION_DURATION = 0.5f;
 
@@ -419,8 +419,8 @@ public class Game : MonoBehaviour
                 scoreIncrement += cells.Length * cells.Length;
             Score += scoreIncrement * combo;
 
-            MainCamenra.GetComponent<LivelyCamera>().PushXZ(new Vector2(combo, scoreIncrement));
-            MainCamenra.GetComponent<LivelyCamera>().JostleY();
+            MainCamera.GetComponent<LivelyCamera>().PushXZ(new Vector2(combo, scoreIncrement));
+            MainCamera.GetComponent<LivelyCamera>().JostleY();
 
             animationElapsedTime = 0;
             return true;

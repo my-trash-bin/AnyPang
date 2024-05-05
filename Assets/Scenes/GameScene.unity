@@ -751,7 +751,7 @@ MonoBehaviour:
   selectionIndicator: {fileID: 354059793}
   effectPrefab: {fileID: 5187005796849276791, guid: 0be033383c8f9cd4e9243e7bc520b5fb, type: 3}
   ScoreText: {fileID: 1728103146}
-  MainCamenra: {fileID: 519420028}
+  MainCamera: {fileID: 519420028}
 --- !u!4 &1661169993
 Transform:
   m_ObjectHideFlags: 0
@@ -938,7 +938,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
-  m_characterSpacing: 1.27
+  m_characterSpacing: 0
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
