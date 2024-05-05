@@ -1,180 +1,15 @@
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-class GameState
-{
-    public struct Cell
-    {
-        public int Type;
-        public int PreviousY;
-        public int X;
-        public int Y;
-    }
-
-    public const int SIZE = 10;
-
-    System.Random random;
-    Cell[] map;
-
-    public GameState()
-    {
-        random = new();
-        map = new Cell[SIZE * SIZE];
-        for (int i = 0; i < SIZE * SIZE; i++)
-        {
-            map[i].Type = Next();
-            map[i].PreviousY = i / SIZE;
-            map[i].X = i % SIZE;
-            map[i].Y = i / SIZE;
-        }
-    }
-
-    public Cell[][] Tick()
-    {
-        for (int i = 0; i < SIZE * SIZE; i++)
-            map[i].PreviousY = i / SIZE;
-
-        List<Cell[]> result = new();
-        bool[] isCleared = new bool[SIZE * SIZE];
-        for (int i = 0; i < SIZE; i++)
-        {
-            for (int j = 0; j < SIZE - 2; j++)
-            {
-                TickCheckRow(result, isCleared, j, i);
-                TickCheckColumn(result, isCleared, i, j);
-            }
-        }
-
-        for (int x = 0; x < SIZE; x++)
-        {
-            int additionalY = 0;
-            for (int y = 0; y < SIZE; y++)
-            {
-                while (isCleared[y * SIZE + x])
-                {
-                    for (int i = y; i < SIZE - 1; i++)
-                    {
-                        map[i * SIZE + x] = map[(i + 1) * SIZE + x];
-                        isCleared[i * SIZE + x] = isCleared[(i + 1) * SIZE + x];
-                    }
-                    map[(SIZE - 1) * SIZE + x] = new Cell
-                    {
-                        Type = Next(),
-                        PreviousY = SIZE + additionalY++,
-                    };
-                    isCleared[(SIZE - 1) * SIZE + x] = false;
-                }
-            }
-        }
-
-        for (int i = 0; i < SIZE * SIZE; i++)
-        {
-            map[i].X = i % SIZE;
-            map[i].Y = i / SIZE;
-        }
-
-        return result.Count == 0 ? null : result.ToArray();
-    }
-
-    private void TickCheckRow(List<Cell[]> result, bool[] isCleared, int x, int y)
-    {
-        if (map[y * SIZE + x].Type == map[y * SIZE + x + 1].Type && map[y * SIZE + x].Type == map[y * SIZE + x + 2].Type)
-        {
-            TickClear(result, isCleared, x, y);
-        }
-    }
-
-    private void TickCheckColumn(List<Cell[]> result, bool[] isCleared, int x, int y)
-    {
-        if (map[y * SIZE + x].Type == map[(y + 1) * SIZE + x].Type && map[y * SIZE + x].Type == map[(y + 2) * SIZE + x].Type)
-        {
-            TickClear(result, isCleared, x, y);
-        }
-    }
-
-    private void TickClear(List<Cell[]> result, bool[] isCleared, int x, int y)
-    {
-        bool[] isClearedNow = new bool[SIZE * SIZE];
-        List<Cell> cells = new();
-        TickFloodFill(result, isCleared, x, y, isClearedNow, cells);
-        result.Add(cells.ToArray());
-        for (int i = 0; i < SIZE * SIZE; i++)
-            isCleared[i] |= isClearedNow[i];
-    }
-
-    private void TickFloodFill(List<Cell[]> result, bool[] isCleared, int x, int y, bool[] isClearedNow, List<Cell> cells)
-    {
-        int i = y * SIZE + x;
-        if (isClearedNow[i]) return;
-        isClearedNow[i] = true;
-        cells.Add(map[i]);
-
-        if (x >= 2)
-            TickFloodFillCheckRow(result, isCleared, x - 2, y, isClearedNow, cells);
-        if (x >= 1 && x + 1 < SIZE)
-            TickFloodFillCheckRow(result, isCleared, x - 1, y, isClearedNow, cells);
-        if (x + 2 < SIZE)
-            TickFloodFillCheckRow(result, isCleared, x, y, isClearedNow, cells);
-        if (y >= 2)
-            TickFloodFillCheckColumn(result, isCleared, x, y - 2, isClearedNow, cells);
-        if (y >= 1 && y + 1 < SIZE)
-            TickFloodFillCheckColumn(result, isCleared, x, y - 1, isClearedNow, cells);
-        if (y + 2 < SIZE)
-            TickFloodFillCheckColumn(result, isCleared, x, y, isClearedNow, cells);
-    }
-
-    private void TickFloodFillCheckRow(List<Cell[]> result, bool[] isCleared, int x, int y, bool[] isClearedNow, List<Cell> cells)
-    {
-        if (isCleared[y * SIZE + x] || isCleared[y * SIZE + x + 1] || isCleared[y * SIZE + x + 2]) return;
-        if (map[y * SIZE + x].Type == map[y * SIZE + x + 1].Type && map[y * SIZE + x].Type == map[y * SIZE + x + 2].Type)
-        {
-            TickFloodFill(result, isCleared, x, y, isClearedNow, cells);
-            TickFloodFill(result, isCleared, x + 1, y, isClearedNow, cells);
-            TickFloodFill(result, isCleared, x + 2, y, isClearedNow, cells);
-        }
-    }
-
-    private void TickFloodFillCheckColumn(List<Cell[]> result, bool[] isCleared, int x, int y, bool[] isClearedNow, List<Cell> cells)
-    {
-        if (isCleared[y * SIZE + x] || isCleared[(y + 1) * SIZE + x] || isCleared[(y + 2) * SIZE + x]) return;
-        if (map[y * SIZE + x].Type == map[(y + 1) * SIZE + x].Type && map[y * SIZE + x].Type == map[(y + 2) * SIZE + x].Type)
-        {
-            TickFloodFill(result, isCleared, x, y, isClearedNow, cells);
-            TickFloodFill(result, isCleared, x, y + 1, isClearedNow, cells);
-            TickFloodFill(result, isCleared, x, y + 2, isClearedNow, cells);
-        }
-    }
-
-    public Cell Get(int index)
-    {
-        return map[index];
-    }
-
-    public void Swap(int a, int b)
-    {
-        (map[a], map[b]) = (map[b], map[a]);
-        map[a].X = a % SIZE;
-        map[a].Y = a / SIZE;
-        map[b].X = b % SIZE;
-        map[b].Y = b / SIZE;
-    }
-
-    int Next()
-    {
-        return random.Next(5);
-    }
-}
 [RequireComponent(typeof(AudioSource))] // automatically add atributes
 public class Game : MonoBehaviour
 {
     [SerializeField]
     GameObject bluePrefab, redPrefab, greenPrefab, yellowPrefab, blackPrefab;
+
     [SerializeField]
     AudioClip pangPrefab;
     AudioSource audioData;
-    [SerializeField]
-    GameObject selectionIndicator;
 
     [SerializeField]
     GameObject effectPrefab;
@@ -207,7 +42,7 @@ public class Game : MonoBehaviour
     GameObject[] particles;
 
     GameState state = new();
-    bool isAnimating;
+    bool isFalling;
     float animationElapsedTime;
     GameState.Cell[][] removedCellGroups = null;
 
@@ -225,7 +60,6 @@ public class Game : MonoBehaviour
 
     void Awake()
     {
-
         audioData = GetComponent<AudioSource>();
         audioData.clip = pangPrefab;
         GameObject[] gemType = { bluePrefab, redPrefab, greenPrefab, yellowPrefab, blackPrefab };
@@ -249,7 +83,6 @@ public class Game : MonoBehaviour
             forAnimation.GetComponent<Collider2D>().enabled = false;
             forAnimation.SetActive(false);
         }
-        selectionIndicator.SetActive(false);
         particles = new GameObject[GameState.SIZE * GameState.SIZE];
         for (int i = 0; i < GameState.SIZE * GameState.SIZE; i++)
         {
@@ -260,6 +93,17 @@ public class Game : MonoBehaviour
     }
 
     void Update()
+    {
+        UpdateCells();
+        UpdateDragAnimation();
+        UpdateEffects();
+        if (isFalling)
+            UpdateFallingAnimation();
+        else
+            UpdateGame();
+    }
+
+    void UpdateCells()
     {
         for (int i = 0; i < GameState.SIZE * GameState.SIZE; i++)
         {
@@ -274,6 +118,21 @@ public class Game : MonoBehaviour
             }
         }
 
+        if (currentSelection != -1)
+        {
+            int x = currentSelection % GameState.SIZE;
+            int y = currentSelection / GameState.SIZE;
+            Vector3 position = Position(x, y);
+            position.z = -5;
+        }
+        for (int i = 0; i < 5; i++)
+        {
+            gemsForAnimation[i].SetActive(false);
+        }
+    }
+
+    void UpdateEffects()
+    {
         bool[] particleEnabled = new bool[GameState.SIZE * GameState.SIZE];
         if (removedCellGroups != null)
             foreach (GameState.Cell[] cells in removedCellGroups)
@@ -281,25 +140,10 @@ public class Game : MonoBehaviour
                     particleEnabled[cell.Y * GameState.SIZE + cell.X] = true;
         for (int i = 0; i < GameState.SIZE * GameState.SIZE; i++)
             particles[i].SetActive(particleEnabled[i]);
+    }
 
-        if (currentSelection == -1)
-        {
-            selectionIndicator.SetActive(false);
-        }
-        else
-        {
-            int x = currentSelection % GameState.SIZE;
-            int y = currentSelection / GameState.SIZE;
-            Vector3 position = Position(x, y);
-            position.z = -5;
-            selectionIndicator.GetComponent<Transform>().localPosition = position;
-            selectionIndicator.SetActive(true);
-        }
-        for (int i = 0; i < 5; i++)
-        {
-            gemsForAnimation[i].SetActive(false);
-        }
-
+    void UpdateDragAnimation()
+    {
         if (currentSelection != -1)
         {
             Vector3 originalWorldPosition = Camera.main.ScreenToWorldPoint(clickedPosition);
@@ -343,27 +187,30 @@ public class Game : MonoBehaviour
                 adjacentGem.GetComponent<SpriteRenderer>().enabled = false;
             }
         }
+    }
 
-        if (isAnimating)
+    void UpdateFallingAnimation()
+    {
+        animationElapsedTime += Time.deltaTime;
+
+        if (animationElapsedTime > FALLING_ANIMATION_DURATION)
         {
-            animationElapsedTime += Time.deltaTime;
-
-            if (animationElapsedTime > FALLING_ANIMATION_DURATION)
-            {
-                isAnimating = false;
-            }
-            else
-            {
-                for (int i = 0; i < GameState.SIZE * GameState.SIZE; i++)
-                {
-                    float currentPosition = state.Get(i).PreviousY - FallingAnimationDistance(animationElapsedTime);
-                    float realPosition = Mathf.Max(i / GameState.SIZE, currentPosition);
-                    gemPool[state.Get(i).Type][i].GetComponent<Transform>().localPosition = Position(i % GameState.SIZE, realPosition);
-                }
-            }
+            isFalling = false;
         }
         else
-            Tick();
+        {
+            for (int i = 0; i < GameState.SIZE * GameState.SIZE; i++)
+            {
+                float currentPosition = state.Get(i).PreviousY - FallingAnimationDistance(animationElapsedTime);
+                float realPosition = Mathf.Max(i / GameState.SIZE, currentPosition);
+                gemPool[state.Get(i).Type][i].GetComponent<Transform>().localPosition = Position(i % GameState.SIZE, realPosition);
+            }
+        }
+    }
+
+    void UpdateGame()
+    {
+        Tick();
     }
 
     int currentSelection = -1;
@@ -371,7 +218,7 @@ public class Game : MonoBehaviour
 
     public void onGemMouseDown(GemInfo gemInfo)
     {
-        if (isAnimating) return;
+        if (isFalling) return;
         if (currentSelection == -1)
         {
             currentSelection = gemInfo.Y * GameState.SIZE + gemInfo.X;
@@ -406,7 +253,7 @@ public class Game : MonoBehaviour
         removedCellGroups = state.Tick();
         if (removedCellGroups != null)
         {
-            isAnimating = true;
+            isFalling = true;
             audioData.volume = removedCellGroups.Length / 3.0f;
             audioData.Play(0);
 
