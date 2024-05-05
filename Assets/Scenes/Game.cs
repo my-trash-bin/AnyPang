@@ -327,7 +327,6 @@ public class Game : MonoBehaviour
 
         if (isAnimating)
         {
-            audioData.Play(0);
             animationElapsedTime += Time.deltaTime;
 
             if (animationElapsedTime > FALLING_ANIMATION_DURATION)
@@ -387,6 +386,8 @@ public class Game : MonoBehaviour
         if (removedCellGroups != null)
         {
             isAnimating = true;
+            audioData.Play(0);
+
             animationElapsedTime = 0;
             return true;
         }
