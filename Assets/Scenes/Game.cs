@@ -1,3 +1,4 @@
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -259,7 +260,7 @@ public class Game : MonoBehaviour
 
             combo++;
 
-            Debug.Log(removedCellGroups.Length);
+            Debug.Log(string.Join('|', removedCellGroups.Select(group => string.Join(',', group.Select(cell => cell.X + ":" + cell.Y)))));
 
             long scoreIncrement = 0;
             foreach (GameState.Cell[] cells in removedCellGroups)
