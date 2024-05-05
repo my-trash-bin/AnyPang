@@ -396,6 +396,8 @@ public class Game : MonoBehaviour
         }
     }
 
+    int combo;
+
     private bool Tick()
     {
         removedCellGroups = state.Tick();
@@ -405,15 +407,23 @@ public class Game : MonoBehaviour
             audioData.volume = removedCellGroups.Length / 3.0f;
             audioData.Play(0);
 
+            combo++;
+
+            Debug.Log(removedCellGroups.Length);
+
             long scoreIncrement = 0;
             foreach (GameState.Cell[] cells in removedCellGroups)
                 scoreIncrement += cells.Length * cells.Length;
-            Score += scoreIncrement;
+            Score += scoreIncrement * combo;
 
             animationElapsedTime = 0;
             return true;
         }
-        return false;
+        else
+        {
+            combo = 0;
+            return false;
+        }
     }
 
     private static bool isAdjacent(int a, int b)
