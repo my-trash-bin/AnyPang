@@ -164,12 +164,14 @@ class GameState
         return random.Next(5);
     }
 }
-
+[RequireComponent(typeof(AudioSource))] // automatically add atributes
 public class Game : MonoBehaviour
 {
     [SerializeField]
     GameObject bluePrefab, redPrefab, greenPrefab, yellowPrefab, blackPrefab;
-
+    [SerializeField]
+    AudioClip pangPrefab;
+    AudioSource audioData;
     [SerializeField]
     GameObject selectionIndicator;
 
@@ -204,6 +206,9 @@ public class Game : MonoBehaviour
 
     void Awake()
     {
+
+        audioData = GetComponent<AudioSource>();
+        audioData.clip = pangPrefab;
         GameObject[] gemType = { bluePrefab, redPrefab, greenPrefab, yellowPrefab, blackPrefab };
         gemPool = new GameObject[5][];
         gemsForAnimation = new GameObject[5];
@@ -322,7 +327,9 @@ public class Game : MonoBehaviour
 
         if (isAnimating)
         {
+            audioData.Play(0);
             animationElapsedTime += Time.deltaTime;
+
             if (animationElapsedTime > FALLING_ANIMATION_DURATION)
             {
                 isAnimating = false;
